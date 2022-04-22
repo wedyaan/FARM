@@ -22,7 +22,7 @@ class AdmainHome extends StatefulWidget {
 class _AdmainHomeState extends State<AdmainHome> {
   List userRecord = [];
   CollectionReference<Map<String, dynamic>> userCollection =
-  FirebaseFirestore.instance.collection("user");
+      FirebaseFirestore.instance.collection("user");
 
 //search user----------------------------------------
   Future getdata() async {
@@ -50,15 +50,16 @@ class _AdmainHomeState extends State<AdmainHome> {
       child: Scaffold(
         appBar: appBar("إدارة المستخدمين", context, icone: Icons.search,
             on_Tap: () {
-              showSearch(context: context, delegate: Search(list: userRecord));
-            }),
+          showSearch(context: context, delegate: Search(list: userRecord));
+        }),
         body: SizedBox(
           width: double.infinity,
           height: double.infinity,
           //color: green,
           child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-              stream:
-              userCollection.orderBy('userType', descending: true).snapshots(),
+              stream: userCollection
+                  .orderBy('userType', descending: true)
+                  .snapshots(),
               builder: (BuildContext context, AsyncSnapshot snapshat) {
                 if (snapshat.hasError) {
                   showMessage(context, "ادارة المستخدمين",
@@ -82,7 +83,7 @@ class _AdmainHomeState extends State<AdmainHome> {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 10.0.w, vertical: 10.h),
       child: ListView.builder(
-        //shrinkWrap: true,
+          //shrinkWrap: true,
           itemCount: snapshat.data.docs.length,
           itemBuilder: (context, i) {
 //delete----------------------------------------------------------
@@ -130,11 +131,11 @@ class _AdmainHomeState extends State<AdmainHome> {
 
                                 getData(
                                     snapshat.data.docs[i].data()['userType'] ==
-                                        "مستخدم"
+                                            "مستخدم"
                                         ? snapshat.data.docs[i]
-                                        .data()['commercialRegister']
+                                            .data()['commercialRegister']
                                         : snapshat.data.docs[i]
-                                        .data()['agriculturalRegistry'],
+                                            .data()['agriculturalRegistry'],
                                     recordIcon),
                               ]),
                             ),
@@ -145,11 +146,11 @@ class _AdmainHomeState extends State<AdmainHome> {
 
                                 getData(
                                     snapshat.data.docs[i].data()['userType'] ==
-                                        "مستخدم"
+                                            "مستخدم"
                                         ? snapshat.data.docs[i]
-                                        .data()['facilityName']
+                                            .data()['facilityName']
                                         : snapshat.data.docs[i]
-                                        .data()['farmName'],
+                                            .data()['farmName'],
                                     buildName),
                                 divider(),
 //phone---------------------------------------------------------
@@ -193,7 +194,7 @@ class _AdmainHomeState extends State<AdmainHome> {
         child: Row(children: [
           Icon(
             icon,
-            color: green,
+            color:green,
           ),
           SizedBox(width: 5.w),
           AppText(
@@ -223,7 +224,7 @@ class _AdmainHomeState extends State<AdmainHome> {
             children: <Widget>[
               Padding(
                 padding:
-                EdgeInsets.symmetric(horizontal: 12.0.w, vertical: 5.h),
+                    EdgeInsets.symmetric(horizontal: 12.0.w, vertical: 5.h),
                 child: Icon(Icons.delete, color: Colors.white, size: 36.sp),
               ),
               const AppText(
@@ -263,9 +264,7 @@ class _AdmainHomeState extends State<AdmainHome> {
                           .delete()
                           .then((value) {});
                       setState(() {});
-                    }
-
-                    );
+                    });
 
                     Navigator.of(context).pop(true);
                   },
