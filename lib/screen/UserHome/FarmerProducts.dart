@@ -1,7 +1,9 @@
 // ignore_for_file: avoid_unnecessary_containers, prefer_typing_uninitialized_variables
 
+import 'package:badges/badges.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:farm/screen/UserHome/UserCard.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -13,34 +15,63 @@ import '../../widget/varaible.dart';
 import 'ProductDetials.dart';
 
 class FarmerProducts extends StatefulWidget {
-  final farmId;
-   FarmerProducts({this.farmId});
+  final String? farmId;
+
+  const FarmerProducts({Key? key, this.farmId}) : super(key: key);
 
   @override
   State<FarmerProducts> createState() => _FarmerProductsState();
 }
 
 class _FarmerProductsState extends State<FarmerProducts> {
+  String? currentUser;
+  var bage = 0;
   CollectionReference productCollection =
       FirebaseFirestore.instance.collection("product");
-  String seleced="فواكهة";
+  CollectionReference cardCollection =
+      FirebaseFirestore.instance.collection("card");
+  String seleced = "فواكهة";
   bool fruitBottom = true;
   bool papersBottom = false;
   bool vegetablesBottom = false;
   bool datesBottom = false;
-  List<String> title = [
-    "فواكهة",
-    "خضروات",
-    "ورقيات",
-    "تمور"
-  ];
+  List<String> title = ["فواكهة", "خضروات", "ورقيات", "تمور"];
   List<double> widgetWidth = [70, 70, 70, 70, 50];
   @override
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-          appBar: appBar("المنتجات", context, icone: card,on_Tap: ()=>Push.to(context, UserCar())),
+          appBar: badgetAppBar("المنتجات", context,
+              badgeIcon: Badge(
+                //showBadge: bage > 0 ? true : false,
+                 position: BadgePosition.topEnd(top: 2.h, end: 23.w),
+                badgeContent: StreamBuilder(
+                  stream: cardCollection
+                      .where('userId', isEqualTo: currentUser)
+                      .snapshots(),
+                  builder: (BuildContext context,
+                      AsyncSnapshot<QuerySnapshot<Object?>> snapshot) {
+                    if (snapshot.hasData) {
+                      return AppText(
+                        text: snapshot.data!.docs.isEmpty ? "" : "${snapshot.data!.docs.length}",
+                        fontSize: 12,
+                      );
+                    }
+                    return const Text("");
+                  },
+                ),
+                child: InkWell(
+                  onTap: () {
+                    Push.to(context, UserCar());
+                  },
+                  child: Icon(
+                    card,
+                    size: 34.sp,
+                    color: green,
+                  ),
+                ),
+              )),
           body: Column(
             children: [
               SizedBox(
@@ -63,7 +94,8 @@ class _FarmerProductsState extends State<FarmerProducts> {
                 child: StreamBuilder(
                     stream: productCollection
                         .where('userID', isEqualTo: widget.farmId)
-                        .where("prCatogary",isEqualTo:seleced).snapshots(),
+                        .where("prCatogary", isEqualTo: seleced)
+                        .snapshots(),
                     builder: (BuildContext context, AsyncSnapshot snapshat) {
                       if (snapshat.hasError) {
                         return Text("${snapshat.error}");
@@ -99,15 +131,18 @@ class _FarmerProductsState extends State<FarmerProducts> {
                 height: 180.h,
                 child: InkWell(
                   onTap: () {
-                   Push.toReplace(context, ProductDeials(
-                      image:snapshat.data.docs[i].data()['imagePath'], 
-                      price :snapshat.data.docs[i].data()['prPrice'],
-                      quantity :snapshat.data.docs[i].data()['prQuantity'], 
-                      decsription:snapshat.data.docs[i].data()['prdescription'],
-                      pr_id:snapshat.data.docs[i].data()['productID'],
-                       pr_name:snapshat.data.docs[i].data()['prName']
-
-                    ));
+                    Push.toReplace(
+                        context,
+                        ProductDeials(
+                          image: snapshat.data.docs[i].data()['imagePath'],
+                          price: snapshat.data.docs[i].data()['prPrice'],
+                          quantity: snapshat.data.docs[i].data()['prQuantity'],
+                          decsription:
+                              snapshat.data.docs[i].data()['prdescription'],
+                          pr_id: snapshat.data.docs[i].data()['productID'],
+                          pr_name: snapshat.data.docs[i].data()['prName'],
+                          farmerId: widget.farmId,
+                        ));
                   },
                   child: Card(
                       elevation: 10,
@@ -121,7 +156,7 @@ class _FarmerProductsState extends State<FarmerProducts> {
                                     topLeft: Radius.circular(4.r),
                                     topRight: Radius.circular(4.r)),
                                 child: Image.network(
-                                 "${snapshat.data.docs[i].data()['imagePath']}",
+                                  "${snapshat.data.docs[i].data()['imagePath']}",
                                   fit: BoxFit.contain,
                                   width: double.infinity,
                                 ),
@@ -137,20 +172,18 @@ class _FarmerProductsState extends State<FarmerProducts> {
                                   children: [
                                     Center(
                                       child: AppText(
-                                          text: 
+                                          text:
                                               "${snapshat.data.docs[i].data()['prName']}",
                                           color: white),
-                                    
                                     ),
                                     AppText(
-                                      text: 
-                                          "${snapshat.data.docs[i].data()['prPrice']} ريال",
-                                      color: white),
+                                        text:
+                                            "${snapshat.data.docs[i].data()['prPrice']} ريال",
+                                        color: white),
                                   ],
                                 ),
                               )),
 //------------------------------------------------------
-
                         ],
                       )),
                 ),
@@ -170,7 +203,7 @@ class _FarmerProductsState extends State<FarmerProducts> {
           papersBottom = false;
           vegetablesBottom = false;
           datesBottom = false;
-          seleced="فواكهة";
+          seleced = "فواكهة";
         });
       },
       child: Container(
@@ -195,8 +228,7 @@ class _FarmerProductsState extends State<FarmerProducts> {
           papersBottom = false;
           vegetablesBottom = true;
           datesBottom = false;
-          seleced="خضروات";
-          
+          seleced = "خضروات";
         });
       },
       child: Container(
@@ -222,7 +254,7 @@ class _FarmerProductsState extends State<FarmerProducts> {
           papersBottom = true;
           vegetablesBottom = false;
           datesBottom = false;
-          seleced="ورقيات";
+          seleced = "ورقيات";
         });
       },
       child: Container(
@@ -248,7 +280,7 @@ class _FarmerProductsState extends State<FarmerProducts> {
           papersBottom = false;
           vegetablesBottom = false;
           datesBottom = true;
-          seleced="تمور";
+          seleced = "تمور";
         });
       },
       child: Container(

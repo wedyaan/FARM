@@ -60,6 +60,7 @@ showMessage(context, String title, String content,
                           text: content,
                           fontSize: 14,
                           color: black,
+                          textAlign: TextAlign.right
                         )),
                       ),
 

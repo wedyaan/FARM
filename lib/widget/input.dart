@@ -16,6 +16,7 @@ class Input extends StatelessWidget {
     this.padding,
     this.icon,
     this.max,
+    this.secret,
     this.min,
     this.inputFormatters,
     this.keyboardType,
@@ -24,6 +25,7 @@ class Input extends StatelessWidget {
   //
   final TextEditingController? controller;
   final String? hintText;
+  bool? secret;
   final bool? isNumberKeyBoard;
   final void Function(String)? onChanged;
   String? Function(String?)? validator;
@@ -41,6 +43,7 @@ class Input extends StatelessWidget {
       child: Container(
         padding: padding,
         child: TextFormField(
+          obscureText: secret==null?false:true,
           minLines: min ?? 1,
           maxLines: max ?? 1,
           autovalidateMode: AutovalidateMode.onUserInteraction,

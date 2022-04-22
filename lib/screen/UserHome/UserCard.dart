@@ -5,7 +5,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../widget/Colors.dart';
 import '../../widget/app_text.dart';
+import '../../widget/btn.dart';
 import '../../widget/method.dart';
+import '../../widget/showMessage.dart';
 import '../../widget/varaible.dart';
 
 class UserCar extends StatefulWidget {
@@ -17,6 +19,13 @@ class UserCar extends StatefulWidget {
 
 class _UserCarState extends State<UserCar> {
   String? currentUser;
+  String? userPhone;
+  String? name;
+  List<String> pr_name = [];
+  List<num> pr_quantity = [];
+  List<num> pr_pricePerOne = [];
+  String farmer_id = '';
+
   var totalPrice = 0.0;
   @override
   void initState() {
@@ -30,12 +39,40 @@ class _UserCarState extends State<UserCar> {
         });
       }
     });
+//-------------------------------------------------------
+    cardCollection.where('userId', isEqualTo: currentUser).get().then((value) {
+      for (var element in value.docs) {
+        pr_name.add(element["prName"]);
+        pr_quantity.add(element["quantity"]);
+        pr_pricePerOne.add(element["total price"]);
+        farmer_id = element["farmerId"];
+      }
+    });
+//----------------------------------------------
+    userCollection
+        .where('userID', isEqualTo: currentUser)
+        .where("userType", isEqualTo: "مستخدم")
+        .get()
+        .then((value) {
+      for (var element in value.docs) {
+        setState(() {
+          name = element["facilityName"];
+          userPhone = element["phone"];
+        });
+      }
+    });
   }
 
   CollectionReference cardCollection =
       FirebaseFirestore.instance.collection("card");
+  CollectionReference userCollection =
+      FirebaseFirestore.instance.collection("user");
   @override
   Widget build(BuildContext context) {
+    // print(pr_name);
+    // print(pr_quantity);
+    // print(pr_pricePerOne);
+    // print(farmer_id);
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -76,11 +113,20 @@ class _UserCarState extends State<UserCar> {
               Align(
                   alignment: Alignment.topRight,
                   child: Padding(
-                    padding: EdgeInsets.only(right: 17.0.w, bottom: 8.0.h),
-                    child: AppText(
-                        text: "الاجمالي $totalPrice ريال ", color: black),
-                  )),
+                      padding: EdgeInsets.only(
+                          right: 17.0.w, left: 17.0.w, bottom: 8.0.h),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          AppText(
+                              text: "الاجمالي $totalPrice ريال ", color: black),
+                          AppText(
+                              text: "عدد الطلبات ${snapshat.data.docs.length}",
+                              color: black),
+                        ],
+                      ))),
               Expanded(
+               
                 child: ListView.builder(
                     itemCount: snapshat.data.docs.length,
                     itemBuilder: (context, i) {
@@ -116,6 +162,12 @@ class _UserCarState extends State<UserCar> {
                                 setState(() {
                                   totalPrice -= snapshat.data.docs[i]
                                       .data()['total price'];
+                                  pr_name.remove(
+                                      snapshat.data.docs[i].data()['prName']);
+                                  pr_quantity.remove(
+                                      snapshat.data.docs[i].data()['quantity']);
+                                  pr_pricePerOne.remove(snapshat.data.docs[i]
+                                      .data()['total price']);
                                 });
                               },
                               icon: const Icon(Icons.remove_circle,
@@ -123,7 +175,42 @@ class _UserCarState extends State<UserCar> {
                         ),
                       );
                     }),
-              )
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20.0.w),
+                child: Btn(
+                  color: green,
+                  onPressed: () {
+                    showMessage(context, "", "lode");
+                    FirebaseFirestore.instance.collection("order").add({
+                      "orderId": orderNumber(),
+                      "ordersName": pr_name,
+                      "quantityPerOrder": pr_quantity,
+                      "pricePerOrder": pr_pricePerOne,
+                      "userName": name,
+                      "phone": userPhone,
+                      "ordersNumber": snapshat.data.docs.length,
+                      "totalPrice": totalPrice,
+                      "userId": currentUser,
+                      "farmerId": farmer_id,
+                    }).then((value) {
+                      showMessage(context, "ارسال الطلب",
+                          "شكرا لطلبك من  مزرعتنا, لقد تم ارسال طلبك وسيتواصل معك مندوب المزرعة لاكمال عملية الدفع");
+                      //delete all user item from card
+                      cardCollection
+                          .where("userId", isEqualTo: currentUser)
+                          .get()
+                          .then((snapshot) {
+                        for (DocumentSnapshot ds in snapshot.docs) {
+                          ds.reference.delete();
+                        }
+                      });
+                    });
+                  },
+                  title: 'تاكيد الطلبات',
+                  txtColor: white,
+                ),
+              ),
             ],
           )
         : const Align(

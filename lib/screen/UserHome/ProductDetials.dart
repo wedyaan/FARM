@@ -20,14 +20,15 @@ class ProductDeials extends StatefulWidget {
   final decsription;
   final pr_id;
   final pr_name;
+  final farmerId;
 
-  const ProductDeials({Key? key, this.image, this.price, this.quantity, this.decsription, this.pr_id, this.pr_name}) : super(key: key);
+  const ProductDeials({Key? key, this.image, this.price, this.quantity, this.decsription, this.pr_id, this.pr_name, this.farmerId}) : super(key: key);
  
   @override
   State<ProductDeials> createState() => _ProductDeialsState();
 }
 
-class _ProductDeialsState extends State<ProductDeials> {
+class _ProductDeialsState extends State<ProductDeials>{
    String ?currentUser;
   @override
   void initState() {
@@ -122,9 +123,10 @@ class _ProductDeialsState extends State<ProductDeials> {
                         "total price": int.parse(widget.price) * total,
                         "quantity":total,
                         "prId":widget.pr_id,
-                        "userId":currentUser
+                        "userId":currentUser,
+                        "farmerId":widget.farmerId,
                       }).then((value) {
-                        Push.toReplace(context,FarmerProducts() );
+                        Push.toReplace(context,FarmerProducts(farmId: widget.farmerId) );
                       });
                     }
                   },
@@ -137,4 +139,5 @@ class _ProductDeialsState extends State<ProductDeials> {
       ),
     );
   }
+  
 }

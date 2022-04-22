@@ -47,7 +47,7 @@ appBar(String title, BuildContext context, {icone, void Function()? on_Tap}) {
                 onTap: on_Tap,
                 child: Icon(
                   icone!,
-                  size: 30,
+                  size: 30.sp,
                   color: green,
                 ),
               ),
@@ -57,7 +57,34 @@ appBar(String title, BuildContext context, {icone, void Function()? on_Tap}) {
     elevation: 0,
   );
 }
-
+//--------------------------------------------------------
+badgetAppBar(String title, BuildContext context, {badgeIcon}) {
+  return AppBar(
+    title: Text(
+      title,
+      style: TextStyle(fontSize: 22.sp, fontFamily: 'cairo-bold', color: black),
+    ),
+    centerTitle: true,
+    leading: IconButton(
+      padding: EdgeInsets.only(right: 20.w),
+      icon: const Icon(Icons.arrow_back_ios),
+      color: Colors.black,
+      onPressed: () {
+        Navigator.maybePop(context);
+      },
+    ),
+    actions: [
+      badgeIcon == null
+          ? const Icon(Icons.add, size: 0)
+          : Padding(
+              padding: EdgeInsets.symmetric(horizontal: 14.0.w),
+              child: badgeIcon)
+    ],
+    backgroundColor: deepwhite,
+    elevation: 0,
+  );
+}
+//----------------------------------------------------------
 //app bar --------------------------------------
 appBarHome(String title, BuildContext context) {
   return AppBar(
@@ -137,4 +164,8 @@ decorationImage(
 }
 int unidID() {
   return DateTime.now().millisecondsSinceEpoch.remainder(10000);
+}
+
+int orderNumber() {
+  return DateTime.now().millisecondsSinceEpoch.remainder(10000000);
 }

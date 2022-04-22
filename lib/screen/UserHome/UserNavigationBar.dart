@@ -1,4 +1,5 @@
 import 'package:farm/screen/FarmerHome/profile.dart';
+import 'package:farm/screen/UserHome/MyOrders.dart';
 import 'package:farm/screen/UserHome/UserCard.dart';
 import 'package:farm/screen/UserHome/UserHomePage.dart';
 import 'package:flutter/material.dart';
@@ -11,8 +12,8 @@ class UserNavigationBar extends StatefulWidget {
 }
 
 class _UserNavigationBarState extends State<UserNavigationBar> {
-   int _selectedIndex = 1;
-  final List page = [UserCar(), const UserHome(), Profile()];
+  int _selectedIndex = 0;
+  final List page = [const UserHome(), MyOrders(), UserCar(), Profile()];
 
   @override
   Widget build(BuildContext context) {
@@ -29,12 +30,17 @@ class _UserNavigationBarState extends State<UserNavigationBar> {
           onTap: onTabTapped,
           items: const [
             BottomNavigationBarItem(
-              icon: Icon(Icons.shopping_cart_rounded),
-              label: "السلة",
-            ),
-            BottomNavigationBarItem(
               icon: Icon(Icons.home_rounded),
               label: "الرئيسية",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.list_alt_outlined),
+              label: "طلباتي",
+            ),
+            BottomNavigationBarItem(
+
+              icon: Icon(Icons.shopping_cart_rounded),
+              label: "السلة",
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.account_circle),

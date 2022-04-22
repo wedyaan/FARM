@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
               primary: Colors.green,
             ),
           ),
-          home: UserHome(),
+          home: UserNavigationBar(),
 
           //----------------------------------
         ),
