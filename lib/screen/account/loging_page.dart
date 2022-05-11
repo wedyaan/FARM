@@ -9,6 +9,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../widget/showMessage.dart';
+import '../AdmainHome/AdmainHome.dart';
+import '../UserHome/UserNavigationBar.dart';
+import 'register_acount_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -18,8 +23,12 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  GlobalKey<FormState> loggingKey = new GlobalKey<FormState>();
+  String type = "";
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  CollectionReference<Map<String, dynamic>> userCollection =
+      FirebaseFirestore.instance.collection("user");
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -28,7 +37,7 @@ class _LoginPageState extends State<LoginPage> {
       body: Padding(
         padding: const EdgeInsets.all(15.0),
         child: Form(
-          key: _formKey,
+          key: loggingKey,
           child: Center(
             child: SingleChildScrollView(
               child: Column(
@@ -55,9 +64,8 @@ class _LoginPageState extends State<LoginPage> {
                       controller: _emailController,
                       hintText: 'البريد الالكتروني',
                       padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      icon: nameIcon,
-                      validator: valedEmile
-                  ),
+                      icon: emailIcon,
+                      validator: valedEmile),
                   const SizedBox(height: 10.0),
                   //كلمة المرور ----------------------------------------------------------------
 
@@ -65,8 +73,9 @@ class _LoginPageState extends State<LoginPage> {
                     controller: _passwordController,
                     hintText: 'كلمة المرور',
                     padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    icon: emailIcon,
+                    icon: passIcon,
                     validator: empity,
+                    secret: true,
                   ),
 
                   const SizedBox(height: 20.0),
@@ -75,8 +84,59 @@ class _LoginPageState extends State<LoginPage> {
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 15.0.w),
                     child: Btn(
-                      onPressed: () {
-                        Push.to(context, navHome());
+                      onPressed: () async {
+                        if (loggingKey.currentState!.validate()) {
+                          try {
+                            showMessage(context, "", "lode");
+                            var userCredential = await FirebaseAuth
+                                .instance
+                                .signInWithEmailAndPassword(
+                                    email: _emailController.text.trim(),
+                                    password: _passwordController.text)
+                                .then((value) async {
+                              await userCollection
+                                  .where("Emile",
+                                      isEqualTo: _emailController.text)
+                                  .where("pass",
+                                      isEqualTo: _passwordController.text)
+                                  .get()
+                                  .then((value) {
+                                   
+                                for (int i = 0; i < value.docs.length; i++) {
+                                  if (value.docs[i]["userType"] == "مزارع") {
+                                    Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                FarmerHome()));
+                                  } else if (value.docs[i]["userType"] ==
+                                      "مستخدم") {
+                                    Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                UserNavigationBar()));
+                                  } else {
+                                    Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                AdmainHome()));
+                                  }
+                                }
+                                 
+                              });
+                              return;
+                            });
+                          } on FirebaseException catch (e) {
+                            //Navigator.pop(context);
+                            if (e.code == 'user-not-found') {
+                              showMessage(context, "خطا", "المستخدم غير موجود");
+                            } else if (e.code == 'wrong-password') {
+                              showMessage(context, "خطا", "المستخدم غير موجود");
+                            }
+                          }
+                        }
                       },
                       title: 'تسجيل دخول',
                     ),
@@ -90,7 +150,7 @@ class _LoginPageState extends State<LoginPage> {
                       color: Colors.white,
                       txtColor: Colors.green,
                       onPressed: () {
-                        Navigator.pop(context);
+                        Push.to(context, RegisterAccountPage());
                       },
                       title: 'إنشاء حساب ',
                     ),

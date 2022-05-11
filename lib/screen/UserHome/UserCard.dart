@@ -21,10 +21,7 @@ class _UserCarState extends State<UserCar> {
   String? currentUser;
   String? userPhone;
   String? name;
-  List<String> pr_name = [];
-  List<num> pr_quantity = [];
-  List<num> pr_pricePerOne = [];
-  String farmer_id = '';
+  var userItem = [];
 
   var totalPrice = 0.0;
   @override
@@ -39,15 +36,9 @@ class _UserCarState extends State<UserCar> {
         });
       }
     });
+    listRefrash();
 //-------------------------------------------------------
-    cardCollection.where('userId', isEqualTo: currentUser).get().then((value) {
-      for (var element in value.docs) {
-        pr_name.add(element["prName"]);
-        pr_quantity.add(element["quantity"]);
-        pr_pricePerOne.add(element["total price"]);
-        farmer_id = element["farmerId"];
-      }
-    });
+
 //----------------------------------------------
     userCollection
         .where('userID', isEqualTo: currentUser)
@@ -69,10 +60,6 @@ class _UserCarState extends State<UserCar> {
       FirebaseFirestore.instance.collection("user");
   @override
   Widget build(BuildContext context) {
-    // print(pr_name);
-    // print(pr_quantity);
-    // print(pr_pricePerOne);
-    // print(farmer_id);
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -86,6 +73,7 @@ class _UserCarState extends State<UserCar> {
               child: StreamBuilder(
                   stream: cardCollection
                       .where('userId', isEqualTo: currentUser)
+                      .where("state", isEqualTo: 0)
                       .snapshots(),
                   builder: (BuildContext context, AsyncSnapshot snapshat) {
                     if (snapshat.hasError) {
@@ -126,7 +114,6 @@ class _UserCarState extends State<UserCar> {
                         ],
                       ))),
               Expanded(
-               
                 child: ListView.builder(
                     itemCount: snapshat.data.docs.length,
                     itemBuilder: (context, i) {
@@ -134,8 +121,18 @@ class _UserCarState extends State<UserCar> {
                         padding: const EdgeInsets.all(8.0),
                         child: ListTile(
                           tileColor: gry,
-                          title: AppText(
-                            text: '${snapshat.data.docs[i].data()['prName']}',
+                          title: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              AppText(
+                                text:
+                                    '${snapshat.data.docs[i].data()['prName']}',
+                              ),
+                              AppText(
+                                text:
+                                    'مزرعة ${snapshat.data.docs[i].data()['farmName']}',
+                              ),
+                            ],
                           ),
                           subtitle: Row(
                             children: [
@@ -162,12 +159,11 @@ class _UserCarState extends State<UserCar> {
                                 setState(() {
                                   totalPrice -= snapshat.data.docs[i]
                                       .data()['total price'];
-                                  pr_name.remove(
-                                      snapshat.data.docs[i].data()['prName']);
-                                  pr_quantity.remove(
-                                      snapshat.data.docs[i].data()['quantity']);
-                                  pr_pricePerOne.remove(snapshat.data.docs[i]
-                                      .data()['total price']);
+                                  FirebaseFirestore.instance
+                                      .collection('card')
+                                      .doc("${snapshat.data.docs[i].id}")
+                                      .delete();
+                                  listRefrash();
                                 });
                               },
                               icon: const Icon(Icons.remove_circle,
@@ -181,28 +177,25 @@ class _UserCarState extends State<UserCar> {
                 child: Btn(
                   color: green,
                   onPressed: () {
+                    print(userItem);
                     showMessage(context, "", "lode");
                     FirebaseFirestore.instance.collection("order").add({
                       "orderId": orderNumber(),
-                      "ordersName": pr_name,
-                      "quantityPerOrder": pr_quantity,
-                      "pricePerOrder": pr_pricePerOne,
+                      "data": userItem,
                       "userName": name,
                       "phone": userPhone,
-                      "ordersNumber": snapshat.data.docs.length,
-                      "totalPrice": totalPrice,
-                      "userId": currentUser,
-                      "farmerId": farmer_id,
                     }).then((value) {
                       showMessage(context, "ارسال الطلب",
                           "شكرا لطلبك من  مزرعتنا, لقد تم ارسال طلبك وسيتواصل معك مندوب المزرعة لاكمال عملية الدفع");
-                      //delete all user item from card
+                      //show item in order table
                       cardCollection
                           .where("userId", isEqualTo: currentUser)
                           .get()
                           .then((snapshot) {
                         for (DocumentSnapshot ds in snapshot.docs) {
-                          ds.reference.delete();
+                          ds.reference.update({
+                            "state": 1,
+                          });
                         }
                       });
                     });
@@ -216,5 +209,18 @@ class _UserCarState extends State<UserCar> {
         : const Align(
             alignment: Alignment.center,
             child: AppText(text: "السلة فارغة حاليا"));
+  }
+
+  listRefrash() {
+    userItem.clear();
+    cardCollection
+        .where('userId', isEqualTo: currentUser)
+        .where("state", isEqualTo: 0)
+        .get()
+        .then((value) {
+      for (var element in value.docs) {
+        userItem.add(element.data());
+      }
+    });
   }
 }

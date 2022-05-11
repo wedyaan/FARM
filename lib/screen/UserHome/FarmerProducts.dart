@@ -16,8 +16,9 @@ import 'ProductDetials.dart';
 
 class FarmerProducts extends StatefulWidget {
   final String? farmId;
-
-  const FarmerProducts({Key? key, this.farmId}) : super(key: key);
+  final String? farmName;
+  const FarmerProducts({Key? key, this.farmId, this.farmName})
+      : super(key: key);
 
   @override
   State<FarmerProducts> createState() => _FarmerProductsState();
@@ -45,16 +46,19 @@ class _FarmerProductsState extends State<FarmerProducts> {
           appBar: badgetAppBar("المنتجات", context,
               badgeIcon: Badge(
                 //showBadge: bage > 0 ? true : false,
-                 position: BadgePosition.topEnd(top: 2.h, end: 23.w),
+                position: BadgePosition.topEnd(top: 2.h, end: 23.w),
                 badgeContent: StreamBuilder(
                   stream: cardCollection
                       .where('userId', isEqualTo: currentUser)
+                      .where("state", isEqualTo: 0)
                       .snapshots(),
                   builder: (BuildContext context,
                       AsyncSnapshot<QuerySnapshot<Object?>> snapshot) {
                     if (snapshot.hasData) {
                       return AppText(
-                        text: snapshot.data!.docs.isEmpty ? "" : "${snapshot.data!.docs.length}",
+                        text: snapshot.data!.docs.isEmpty
+                            ? ""
+                            : "${snapshot.data!.docs.length}",
                         fontSize: 12,
                       );
                     }
@@ -142,6 +146,7 @@ class _FarmerProductsState extends State<FarmerProducts> {
                           pr_id: snapshat.data.docs[i].data()['productID'],
                           pr_name: snapshat.data.docs[i].data()['prName'],
                           farmerId: widget.farmId,
+                          farmName: widget.farmName,
                         ));
                   },
                   child: Card(

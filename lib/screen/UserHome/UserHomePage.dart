@@ -125,6 +125,7 @@ class _UserHomeState extends State<UserHome> {
                         context,
                         FarmerProducts(
                           farmId: snapshat.data.docs[i].data()['userID'],
+                          farmName: snapshat.data.docs[i].data()['farmName'],
                         ));
                   },
                   child: Card(

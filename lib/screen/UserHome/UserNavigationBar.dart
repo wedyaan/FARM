@@ -4,6 +4,8 @@ import 'package:farm/screen/UserHome/UserCard.dart';
 import 'package:farm/screen/UserHome/UserHomePage.dart';
 import 'package:flutter/material.dart';
 
+import 'Profile.dart';
+
 class UserNavigationBar extends StatefulWidget {
   UserNavigationBar({Key? key}) : super(key: key);
 
@@ -13,7 +15,7 @@ class UserNavigationBar extends StatefulWidget {
 
 class _UserNavigationBarState extends State<UserNavigationBar> {
   int _selectedIndex = 0;
-  final List page = [const UserHome(), MyOrders(), UserCar(), Profile()];
+  final List page = [const UserHome(), MyOrders(), UserCar(), UserProfile()];
 
   @override
   Widget build(BuildContext context) {

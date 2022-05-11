@@ -269,12 +269,12 @@ class _AddNewProductState extends State<AddNewProduct> {
       await FirebaseFirestore.instance.collection('product').add({
         "userID": userId,
         'prName': prName.text,
-        'prPrice': prPrice.text,
-        'prQuantity': prQuantity.text,
+        'prPrice': int.parse(prPrice.text),
+        'prQuantity': int.parse(prQuantity.text),
         'prCatogary': prCatogary.text,
         'prdescription': prdescription.text,
         'imagePath': imageURL,
-        "productID":UniqueKey(),
+        "productID": unidID(),
 
 
       }).then((value) {

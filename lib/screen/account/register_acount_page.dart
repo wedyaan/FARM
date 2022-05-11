@@ -39,7 +39,7 @@ class _RegisterAccountPageState extends State<RegisterAccountPage> {
   final TextEditingController _farmNameController = TextEditingController();
   final TextEditingController _facilityNameController = TextEditingController();
   final TextEditingController _city = TextEditingController();
-  GlobalKey<FormState> singupKey = new GlobalKey<FormState>();
+  GlobalKey<FormState> singupKey =  GlobalKey<FormState>();
 
   bool showUserRecord = false;
   bool showFarmRecord = true;
@@ -133,6 +133,7 @@ class _RegisterAccountPageState extends State<RegisterAccountPage> {
                     controller: _passwordController,
                     hintText: 'كلمة المرور',
                     icon: showPassIcon,
+                    secret: true,
                     padding: const EdgeInsets.symmetric(horizontal: 10.0),
                     validator: empity),
                 SizedBox(height: 10.0.h),

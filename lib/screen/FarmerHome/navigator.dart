@@ -3,14 +3,14 @@ import 'package:farm/screen/FarmerHome/Manage%20Request/requist.dart';
 import 'package:farm/screen/FarmerHome/profile.dart';
 import 'package:flutter/material.dart';
 
-class navHome extends StatefulWidget {
-  navHome({Key? key}) : super(key: key);
+class FarmerHome extends StatefulWidget {
+  FarmerHome({Key? key}) : super(key: key);
 
   @override
-  State<navHome> createState() => _navHomeState();
+  State<FarmerHome> createState() => _FarmerHomeState();
 }
 
-class _navHomeState extends State<navHome> {
+class _FarmerHomeState extends State<FarmerHome> {
   @override
   int _selectedIndex = 1;
   final List page = [

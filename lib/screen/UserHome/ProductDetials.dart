@@ -11,7 +11,6 @@ import 'package:counter_button/counter_button.dart';
 import '../../widget/Colors.dart';
 import '../../widget/app_text.dart';
 import '../../widget/method.dart';
-import '../../widget/showMessage.dart';
 
 class ProductDeials extends StatefulWidget {
   final image;
@@ -21,22 +20,41 @@ class ProductDeials extends StatefulWidget {
   final pr_id;
   final pr_name;
   final farmerId;
+  final farmName;
+  const ProductDeials(
+      {Key? key,
+      this.image,
+      this.price,
+      this.quantity,
+      this.decsription,
+      this.pr_id,
+      this.pr_name,
+      this.farmerId,
+      this.farmName})
+      : super(key: key);
 
-  const ProductDeials({Key? key, this.image, this.price, this.quantity, this.decsription, this.pr_id, this.pr_name, this.farmerId}) : super(key: key);
- 
   @override
   State<ProductDeials> createState() => _ProductDeialsState();
 }
 
-class _ProductDeialsState extends State<ProductDeials>{
-   String ?currentUser;
+class _ProductDeialsState extends State<ProductDeials> {
+  CollectionReference cardCollection =
+      FirebaseFirestore.instance.collection("card");
+  int? x;
+  String? docId;
+  String? currentUser;
+  int? dbQuantity;
+  int? dbtotalPrice;
   @override
   void initState() {
     super.initState();
-    currentUser=FirebaseAuth.instance.currentUser!.uid;
+    currentUser = FirebaseAuth.instance.currentUser!.uid;
+
+//search for product id
+    searchForProduct();
   }
+
   int total = 1;
- // int pr_total = 1;
 
   @override
   Widget build(BuildContext context) {
@@ -117,17 +135,37 @@ class _ProductDeialsState extends State<ProductDeials>{
                     } else if (total > int.parse(widget.quantity)) {
                       print("الكمية لاتكفي");
                     } else {
-                       showMessage(context, "اضافة الي السلة", "lode");
-                      FirebaseFirestore.instance.collection("card").add({
-                        "prName": widget.pr_name,
-                        "total price": int.parse(widget.price) * total,
-                        "quantity":total,
-                        "prId":widget.pr_id,
-                        "userId":currentUser,
-                        "farmerId":widget.farmerId,
-                      }).then((value) {
-                        Push.toReplace(context,FarmerProducts(farmId: widget.farmerId) );
-                      });
+//if item found it will update quantity and price
+                      if (x == 1) {
+                        cardCollection.doc(docId).update({
+                          "total price":
+                              dbtotalPrice! + (int.parse(widget.price) * total),
+                          "quantity": dbQuantity! + total,
+                        }).then((value) {
+                          Push.toReplace(
+                              context,
+                              FarmerProducts(
+                                  farmId: widget.farmerId,
+                                  farmName: widget.farmName));
+                        });
+                      } else {
+                        FirebaseFirestore.instance.collection("card").add({
+                          "prName": widget.pr_name,
+                          "total price": int.parse(widget.price) * total,
+                          "quantity": total,
+                          "prId": widget.pr_id,
+                          "userId": currentUser,
+                          "farmerId": widget.farmerId,
+                          "farmName": widget.farmName,
+                          "state": 0
+                        }).then((value) {
+                          Push.toReplace(
+                              context,
+                              FarmerProducts(
+                                  farmId: widget.farmerId,
+                                  farmName: widget.farmName));
+                        });
+                      }
                     }
                   },
                   title: 'اضافة الي السلة',
@@ -139,5 +177,23 @@ class _ProductDeialsState extends State<ProductDeials>{
       ),
     );
   }
-  
+
+  void searchForProduct() {
+    cardCollection
+        .where('prId', isEqualTo: widget.pr_id)
+        .where("state", isEqualTo: 0)
+        .get()
+        .then((value) {
+      setState(() {
+        x = value.docs.length;
+        for (var element in value.docs) {
+          setState(() {
+            docId = element.id;
+            dbQuantity = element["quantity"];
+            dbtotalPrice = element["total price"];
+          });
+        }
+      });
+    });
+  }
 }

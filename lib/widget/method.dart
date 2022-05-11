@@ -1,3 +1,5 @@
+import 'package:farm/screen/account/loging_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
@@ -57,6 +59,7 @@ appBar(String title, BuildContext context, {icone, void Function()? on_Tap}) {
     elevation: 0,
   );
 }
+
 //--------------------------------------------------------
 badgetAppBar(String title, BuildContext context, {badgeIcon}) {
   return AppBar(
@@ -84,6 +87,7 @@ badgetAppBar(String title, BuildContext context, {badgeIcon}) {
     elevation: 0,
   );
 }
+
 //----------------------------------------------------------
 //app bar --------------------------------------
 appBarHome(String title, BuildContext context) {
@@ -93,7 +97,13 @@ appBarHome(String title, BuildContext context) {
       style: TextStyle(fontSize: 21.sp, fontFamily: 'cairo-bold', color: white),
     ),
     centerTitle: true,
-    leading: Text(""),
+    leading: IconButton(
+        onPressed: () {
+          FirebaseAuth.instance.signOut();
+          Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (_) => const LoginPage()));
+        },
+        icon: const Icon(Icons.logout)),
     backgroundColor: green,
     elevation: 0,
   );
@@ -109,13 +119,12 @@ decoration(
   double blurRadius = 0.0,
   double spreadRadius = 0.0,
   BoxBorder? border,
- 
 }) {
   return BoxDecoration(
-  //
+    //
     color: color,
     border: border,
-    
+
     borderRadius: BorderRadius.only(
       topLeft: Radius.circular(topLeft.r),
       topRight: Radius.circular(topRight.r),
@@ -133,21 +142,17 @@ decoration(
 
 //container decoration-------------------------------------------
 decorationImage(
-  double bottomLeft,
-  double bottomRight,
-  double topLeft,
-  double topRight, {
-  Color color = deepwhite,
-  double blurRadius = 0.0,
-  double spreadRadius = 0.0,
-  BoxBorder? border,
-  String ?image
-}) {
+    double bottomLeft, double bottomRight, double topLeft, double topRight,
+    {Color color = deepwhite,
+    double blurRadius = 0.0,
+    double spreadRadius = 0.0,
+    BoxBorder? border,
+    String? image}) {
   return BoxDecoration(
-  //
+    //
     color: color,
     border: border,
-    image:DecorationImage(image: AssetImage(image!),fit: BoxFit.cover),
+    image: DecorationImage(image: AssetImage(image!), fit: BoxFit.cover),
     borderRadius: BorderRadius.only(
       topLeft: Radius.circular(topLeft.r),
       topRight: Radius.circular(topRight.r),
@@ -162,6 +167,7 @@ decorationImage(
     ],
   );
 }
+
 int unidID() {
   return DateTime.now().millisecondsSinceEpoch.remainder(10000);
 }
